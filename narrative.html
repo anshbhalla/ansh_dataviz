@@ -1,0 +1,702 @@
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style> circle {fill: "blue"; stroke: "black";} </style>
+<body onload='init()'>
+<br><br><br><br>
+    <select id = "branch_type" text-align: center>
+        <option value="branchAll">All Branches</option>
+        <option value="branchA">Branch A</option>
+        <option value="branchB">Branch B</option>
+        <option value="branchC">Branch C</option>
+    </select>
+
+<!-- <svg width=300 height=300 >
+</svg> -->
+<script>
+
+const dropdown = d3.select("#branch_type");
+dropdown.on("change", function(){createFirstChart()});
+
+
+async function createFirstChart(drop_val) {
+    d3.select("svg").remove();
+    dropdown.property("disabled", false);
+    const tdata = await d3.csv("https://anshbhalla.github.io/testData/supermarket_sales%20-%20Sheet1.csv")
+    branch = dropdown.property("value")
+
+    // console.log(JSON.stringify(data["val"], null, 4))
+
+    console.log(branch)
+
+
+    var mydict = {}
+    Object.keys(tdata).forEach(function(key){
+        if (branch == "branchAll") {
+            var floor_time = parseFloat(tdata[key]["Time"])
+            if (mydict.hasOwnProperty(floor_time)){
+                mydict[floor_time] += parseFloat(tdata[key]["Total"])
+            } else {
+                mydict[floor_time] = parseFloat(tdata[key]["Total"])
+            }
+        } else if (branch == "branchA") {
+            if (tdata[key]["Branch"] == "A") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                if (mydict.hasOwnProperty(floor_time)){
+                    mydict[floor_time] += parseFloat(tdata[key]["Total"])
+                } else {
+                    mydict[floor_time] = parseFloat(tdata[key]["Total"])
+                }
+            }
+        }  else if (branch == "branchB") {
+            if (tdata[key]["Branch"] == "B") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                if (mydict.hasOwnProperty(floor_time)){
+                    mydict[floor_time] += parseFloat(tdata[key]["Total"])
+                } else {
+                    mydict[floor_time] = parseFloat(tdata[key]["Total"])
+                }
+            }
+        }  else if (branch == "branchC") {
+            if (tdata[key]["Branch"] == "C") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                if (mydict.hasOwnProperty(floor_time)){
+                    mydict[floor_time] += parseFloat(tdata[key]["Total"])
+                } else {
+                    mydict[floor_time] = parseFloat(tdata[key]["Total"])
+                }
+            }
+        }
+
+        // mydict[floor_time] = mydict[floor_time] + 1
+        // console.log(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
+    });
+
+    for (var key in mydict){
+        if (key ==  "NaN") {
+            continue;
+        }
+        var value = mydict[key]
+        console.log(key, value)
+    }
+
+    var outdata = []
+    for (var key in mydict){
+        if (key ==  "NaN") {
+            continue;
+        }
+
+        var value = mydict[key]
+        outdata.push({key, value})
+    }
+
+    final_out = []
+    // console.log("here")
+    max_key = ""
+    max_val = 0
+    min_key = ""
+    min_val = 1000000
+    for (let i = 0; i < outdata.length; i++) {
+        time_fixed = outdata[i]["key"]
+        if (time_fixed == "10" || time_fixed == "11") {
+            time_fixed += "AM"
+        } else if (time_fixed == "12") {
+            time_fixed += "PM"
+        } else if (time_fixed == "13" || time_fixed == "14" || time_fixed == "15" || time_fixed == "16" || time_fixed == "17" || time_fixed == "18" || time_fixed == "19" || time_fixed == "20") {
+            time_fixed = String(parseInt(time_fixed) - 12) + "PM"
+        }
+        // console.log("time", time_fixed, outdata[i]["key"])
+        final_out.push({"key": outdata[i]["key"], "value": outdata[i]["value"]})
+
+        if (outdata[i]["value"] > max_val) {
+            max_key = outdata[i]["key"]
+            max_val = outdata[i]["value"]
+            // console.log("max", max_key, time_fixed)
+        } else if (outdata[i]["value"] < max_val) {
+            min_key = outdata[i]["key"]
+            min_val = outdata[i]["value"]
+        }
+        // console.log(outdata[i]["key"], outdata[i]["value"])
+    }
+    
+    var mysvg = d3.select("body")
+                .append("svg")
+                .attr("width", 1500).attr("height", 700)
+                .append("g")
+                .attr("transform", "translate(500, 100)")
+                .attr("id", "firstChart");
+    mysvg.append("text")
+        .attr("x", 270)
+        .attr("y", -30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "28px")
+        .text(function(d) {
+            if (branch == "branchAll") {
+                return "Total Sales Per Hour for All Branches";
+            } else if (branch == "branchA") {
+                return "Total Sales Per Hour for Branch A";
+            }  else if (branch == "branchB") {
+                return "Total Sales Per Hour for Branch B";
+            }  else if (branch == "branchC") {
+                return "Total Sales Per Hour for Branch C";
+            } else {
+                return "none"
+            }
+        } )
+            
+
+    // console.log(final_out)
+
+
+    var xLabels = [ "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM", "6PM", "7PM", "8PM"];
+    var x = d3.scaleLinear().domain([9, 20]).range([0, 475]);
+    
+
+    // xa = d3.axisBottom(d3.scaleLinear().domain([9, 20]).range([0, 475])).tickValues(xLabels);
+    xa = d3.axisBottom(d3.scaleBand().domain(xLabels).range([0, 475]));
+    ya = d3.axisLeft(d3.scaleLinear().domain([0, 45000]).range([375,0]));
+    mysvg.append("g").attr("transform", "translate(0, 375)").call(xa);
+    mysvg.append("g").call(ya);
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", 310)
+        .attr("y", 420)
+        .text("Hours of Store");
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", -100)
+        .attr("y", -70)
+        .attr("dy", ".02em")
+        .attr("transform", "rotate(-90)")
+        .text("Total Sales in Dollars");
+
+    
+    
+    var y = d3.scaleLinear().domain([0, 45000]).range([375, 0]);
+    mysvg.append("path").datum(final_out)
+      .attr("stroke", "black")
+      .attr("fill", "none")
+      .attr("d", d3.line().x(function(d) { return x(d.key) - 20}).y(function(d) { return y(d.value) }))
+
+
+    var points = mysvg.append("g").selectAll("dot").data(final_out).enter()
+                .append("circle")
+                .attr("cx", function (d){return x(d.key) - 20;})
+                .attr("cy", function(d){return y(d.value); })
+                .attr("r", 5)
+                .style("fill", "blue").on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createSecondChart(d, d.key, branch) }) ;
+                // .style("fill", "blue").on("click", function (d) { console.log(d.key) }) ;
+    // var x = d3.scaleLog().base(10).domain(domain).range([ 0, width ]);
+    
+
+    // console.log("my max_key", max_key)
+    // console.log(min_key)
+
+    var max_line = mysvg.append("g").attr("id", "max_line");
+    var min_line = mysvg.append("g").attr("id", "min_line");
+
+    line_string = ""
+    if (max_key == "10" || max_key == "11") {
+        line_string += max_key + "AM"
+    } else if (max_key == "12") {
+        line_string += max_key + "PM"
+    } else if (max_key == "13" || max_key == "14" || max_key == "15" || max_key == "16" || max_key == "17" || max_key == "18" || max_key == "19" || max_key == "20") {
+        line_string = String(parseInt(max_key) - 12) + "PM"
+    }
+    max_line.append("text")
+      .attr("x", x(max_key) + 10) 
+      .attr("y", y(max_val) - 5)
+      .attr("text-anchor", "start")
+      .text(`Peak Hour at ${line_string} with ${max_val.toFixed(2)} in Sales`)
+      .attr("fill", "green");
+    
+    line_string = ""
+    if (min_key == "10" || min_key == "11") {
+        line_string += min_key + "AM"
+    } else if (min_key == "12") {
+        line_string += min_key + "PM"
+    } else if (min_key == "13" || min_key == "14" || min_key == "15" || min_key == "16" || min_key == "17" || min_key == "18" || min_key == "19" || min_key == "20") {
+        line_string = String(parseInt(min_key) - 12) + "PM"
+    }
+
+    max_line.append("line")
+      .attr("x1", x(max_key) - 15)
+      .attr("y1", y(max_val))
+      .attr("x2", x(max_key) + 10)
+      .attr("y2", y(max_val) - 8)
+      .attr("stroke", "green");
+
+    max_line.append("text")
+        .attr("x", x(min_key) + 10) 
+        .attr("y", y(min_val) - 5)
+        .attr("text-anchor", "start")
+        .text(`Lowest Hour at ${line_string} with ${min_val.toFixed(2)} in Sales`)
+        .attr("fill", "red");
+    max_line.append("line")
+        .attr("x1", x(min_key) - 15)
+        .attr("y1", y(min_val))
+        .attr("x2", x(min_key) + 10)
+        .attr("y2", y(min_val) - 8)
+        .attr("stroke", "red");
+
+
+
+}
+
+async function createSecondChart(tdata, key_hour, branch){
+    d3.select("#firstChart").html = ""
+    dropdown.property("disabled", true);
+    // console.log("in second chart")
+    d3.selectAll('#firstChart').remove();
+    var tdata = await d3.csv("https://anshbhalla.github.io/testData/supermarket_sales%20-%20Sheet1.csv")
+
+    // console.log(tdata_2)
+    
+
+    var mydict = {}
+    Object.keys(tdata).forEach(function(key){
+        if (branch == "branchAll") {
+            var floor_time = parseFloat(tdata[key]["Time"])
+            var product_line = (tdata[key]["Product line"])
+            // console.log("time", product_line)
+
+            if (floor_time == key_hour) {
+                if (mydict.hasOwnProperty(product_line)){
+                    mydict[product_line] += parseFloat(tdata[key]["Total"])
+                } else {
+                    mydict[product_line] = parseFloat(tdata[key]["Total"])
+                }
+            }
+        } else if (branch == "branchA") {
+            if (tdata[key]["Branch"] == "A") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                var product_line = (tdata[key]["Product line"])
+                // console.log("time", product_line)
+
+                if (floor_time == key_hour) {
+                    if (mydict.hasOwnProperty(product_line)){
+                        mydict[product_line] += parseFloat(tdata[key]["Total"])
+                    } else {
+                        mydict[product_line] = parseFloat(tdata[key]["Total"])
+                    }
+                }
+            }
+        }  else if (branch == "branchB") {
+            if (tdata[key]["Branch"] == "B") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                var product_line = (tdata[key]["Product line"])
+                // console.log("time", product_line)
+
+                if (floor_time == key_hour) {
+                    if (mydict.hasOwnProperty(product_line)){
+                        mydict[product_line] += parseFloat(tdata[key]["Total"])
+                    } else {
+                        mydict[product_line] = parseFloat(tdata[key]["Total"])
+                    }
+                }
+            }
+        } else if (branch == "branchC") {
+            if (tdata[key]["Branch"] == "C") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                var product_line = (tdata[key]["Product line"])
+                // console.log("time", product_line)
+
+                if (floor_time == key_hour) {
+                    if (mydict.hasOwnProperty(product_line)){
+                        mydict[product_line] += parseFloat(tdata[key]["Total"])
+                    } else {
+                        mydict[product_line] = parseFloat(tdata[key]["Total"])
+                    }
+                }
+            }
+        }
+
+        // mydict[floor_time] = mydict[floor_time] + 1
+        // console.log(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
+    });
+
+
+    for (var key in mydict){
+        if (key ==  "NaN") {
+            continue;
+        }
+        var value = mydict[key]
+        // console.log(key, value)
+    }
+
+    var outdata = []
+    for (var key in mydict){
+        if (key ==  "NaN") {
+            continue;
+        }
+
+        var value = mydict[key]
+        outdata.push({key, value})
+    }
+
+
+    final_out = []
+    console.log("here")
+    max_key = ""
+    max_val = 0
+    min_key = ""
+    min_val = 1000000
+    for (let i = 0; i < outdata.length; i++) {
+
+        final_out.push({"key": outdata[i]["key"], "value": outdata[i]["value"]})
+
+        console.log("yup", outdata[i]["key"], outdata[i]["value"])
+    }
+
+
+    var mysvg = d3.select("svg")
+                    .attr("width", 1000).attr("height", 700)
+                    .append("g")
+                    .attr("transform", "translate(400, 100)")
+                    .attr("id", "secondChart");
+
+    
+    line_string = ""
+    if (key_hour == "10" || key_hour == "11") {
+        line_string += key_hour + "AM"
+    } else if (max_key == "12") {
+        line_string += key_hour + "PM"
+    } else if (key_hour == "13" || key_hour == "14" || key_hour == "15" || key_hour == "16" || key_hour == "17" || key_hour == "18" || key_hour == "19" || key_hour == "20") {
+        line_string = String(parseInt(key_hour) - 12) + "PM"
+    }
+
+    mysvg.append("text")
+        .attr("x", 270)
+        .attr("y", -30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "28px")
+        .text(function(d) {
+            if (branch == "branchAll") {
+                return "Total Sales Per Product Line at for All Branches at " + line_string;
+            } else if (branch == "branchA") {
+                return "Total Sales Per Product Line at for Branch A at " + line_string;
+            }  else if (branch == "branchB") {
+                return "Total Sales Per Product Line at for Branch A at " + line_string;
+            }  else if (branch == "branchC") {
+                return "Total Sales Per Product Line at for Branch A at " + line_string;
+            } else {
+                return "none"
+            }
+        } )
+
+                
+    
+    var myorder = ["Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"]
+    final_out = final_out.sort((x, y) => myorder.indexOf(x.key) - myorder.indexOf(y.key));
+
+    for (let i = 0; i < final_out.length; i++) {
+        console.log("cur max", max_val, "cur min", min_val, "finalout", final_out[i]["value"], final_out[i]["key"])
+        if (final_out[i]["value"] > max_val) {
+            
+            max_key = final_out[i]["key"]
+            max_val = final_out[i]["value"]
+        } else if (final_out[i]["value"] < min_val) {
+            min_key = final_out[i]["key"]
+            min_val = final_out[i]["value"]
+        }
+    }
+
+    console.log("here min", min_key)
+    
+    //"Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"
+    var x = d3.scaleBand().domain(["Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"]).range([0, 475]);
+    xa = d3.axisBottom(d3.scaleBand().domain(["Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"]).range([0, 475]));
+    ya = d3.axisLeft(d3.scaleLinear().domain([0, 9000]).range([375,0]));
+    mysvg.append("g").attr("transform", "translate(0, 375)").call(xa)
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(315)")
+        .style("text-anchor", "end");
+    mysvg.append("g").call(ya);
+
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", 290)
+        .attr("y", 475)
+        .text("Product Line Type");
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", -100)
+        .attr("y", -70)
+        .attr("dy", ".02em")
+        .attr("transform", "rotate(-90)")
+        .text("Total Sales in Dollars");
+
+    var y = d3.scaleLinear().domain([0, 9000]).range([375, 0]);
+    var points = mysvg.append("g").selectAll(".bar").data(final_out).enter()
+                    .append('rect')
+                    .attr('x',function(d, i){return i * 475 / 6 + 20})
+                    .attr('y', function(d) {return y(d.value)})
+                    .attr('width',x.bandwidth() / 2)
+                    .attr('height',function(d,i){return 375 - y(d.value) })
+                    .style('fill',function(d){
+                        if (d.key == "Sports and travel") {
+                            return "#E8DE03";
+                        }
+                        if (d.key == "Home and lifestyle") {
+                            return "#33CA3E";
+                        }
+                        if (d.key == "Fashion accessories") {
+                            return "#F98B00";
+                        }
+                        if (d.key == "Electronic accessories") {
+                            return "#AA64FF";
+                        }
+                        if (d.key == "Food and beverages") {
+                            return "#D90000";
+                        }
+                        if (d.key == "Health and beauty") {
+                            return "#00BAF6";
+                        }
+                        return "black"
+                    }).on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createThirdChart(d, d.key, key_hour, branch) }) ;
+
+
+    mysvg.append("g").selectAll(".bar").data(final_out).enter().append("text")
+        .text(function(d){
+            if (d.key == max_key) {
+                return "Peak: " + d.value.toFixed(2);
+            }
+            if (d.key == min_key) {
+                return "Low: " + d.value.toFixed(2);
+            }
+            return d.value.toFixed(2);})
+        .attr('x',function(d, i){return i * 475 / 6 + 40})
+        .attr('y', function(d) {return y(d.value) - 3})
+        .attr("font-size" , "12px")
+        .style('fill',function(d){
+            console.log("in function", max_key, d.key)
+            if (d.key == max_key) {
+                return "green";
+            }
+            if (d.key == min_key) {
+                return "red";
+            }
+            return "black"})
+        .attr("text-anchor", "middle");
+
+    
+
+}
+
+async function createThirdChart(tdata, key_product, key_hour, branch){
+    console.log("in third chart")
+    d3.selectAll('#secondChart').remove();
+    var tdata = await d3.csv("https://anshbhalla.github.io/testData/supermarket_sales%20-%20Sheet1.csv")
+
+    console.log(branch)
+
+    var mydict = {}
+    Object.keys(tdata).forEach(function(key){
+        if (branch == "branchAll") {
+            var floor_time = parseFloat(tdata[key]["Time"])
+            var product_line = (tdata[key]["Product line"])
+            var customer_type = (tdata[key]["Customer type"])
+            // console.log("time", product_line)
+
+            if (floor_time == key_hour && product_line == key_product) {
+                if (mydict.hasOwnProperty(customer_type)){
+                    mydict[customer_type] += parseFloat(tdata[key]["Total"])
+                } else {
+                    mydict[customer_type] = parseFloat(tdata[key]["Total"])
+                }
+            }
+        } else if (branch == "branchA") {
+            if (tdata[key]["Branch"] == "A") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                var product_line = (tdata[key]["Product line"])
+                var customer_type = (tdata[key]["Customer type"])
+                // console.log("time", product_line)
+
+                if (floor_time == key_hour && product_line == key_product) {
+                    if (mydict.hasOwnProperty(customer_type)){
+                        mydict[customer_type] += parseFloat(tdata[key]["Total"])
+                    } else {
+                        mydict[customer_type] = parseFloat(tdata[key]["Total"])
+                    }
+                }
+            }
+        }  else if (branch == "branchB") {
+            if (tdata[key]["Branch"] == "B") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                var product_line = (tdata[key]["Product line"])
+                var customer_type = (tdata[key]["Customer type"])
+                // console.log("time", product_line)
+
+                if (floor_time == key_hour && product_line == key_product) {
+                    if (mydict.hasOwnProperty(customer_type)){
+                        mydict[customer_type] += parseFloat(tdata[key]["Total"])
+                    } else {
+                        mydict[customer_type] = parseFloat(tdata[key]["Total"])
+                    }
+                }
+            }
+        }  else if (branch == "branchC") {
+            if (tdata[key]["Branch"] == "C") {
+                var floor_time = parseFloat(tdata[key]["Time"])
+                var product_line = (tdata[key]["Product line"])
+                var customer_type = (tdata[key]["Customer type"])
+                // console.log("time", product_line)
+
+                if (floor_time == key_hour && product_line == key_product) {
+                    if (mydict.hasOwnProperty(customer_type)){
+                        mydict[customer_type] += parseFloat(tdata[key]["Total"])
+                    } else {
+                        mydict[customer_type] = parseFloat(tdata[key]["Total"])
+                    }
+                }
+            }
+        }
+
+        // mydict[floor_time] = mydict[floor_time] + 1
+        // console.log(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
+    });
+
+
+    for (var key in mydict){
+        if (key ==  "NaN") {
+            continue;
+        }
+        var value = mydict[key]
+        // console.log(key, value)
+    }
+
+    var outdata = []
+    for (var key in mydict){
+        if (key ==  "NaN") {
+            continue;
+        }
+
+        var value = mydict[key]
+        outdata.push({key, value})
+    }
+
+
+    final_out = []
+    
+    for (let i = 0; i < outdata.length; i++) {
+
+        final_out.push({"key": outdata[i]["key"], "value": outdata[i]["value"]})
+
+        // console.log("yup", outdata[i]["key"], outdata[i]["value"])
+    }
+    // console.log("580", outdata)
+
+    line_string = ""
+    if (key_hour == "10" || key_hour == "11") {
+        line_string += key_hour + "AM"
+    } else if (max_key == "12") {
+        line_string += key_hour + "PM"
+    } else if (key_hour == "13" || key_hour == "14" || key_hour == "15" || key_hour == "16" || key_hour == "17" || key_hour == "18" || key_hour == "19" || key_hour == "20") {
+        line_string = String(parseInt(key_hour) - 12) + "PM"
+    }
+    var mysvg = d3.select("svg")
+                    .attr("width", 1500).attr("height", 700)
+                    .append("g")
+                    .attr("transform", "translate(400, 100)")
+                    .attr("id", "secondChart");
+
+                    mysvg.append("text")
+        .attr("x", 270)
+        .attr("y", -30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "28px")
+        .text(function(d) {
+            if (branch == "branchAll") {
+                return "Total Sales Per Customer Type for All Branches at " + line_string + " for " + key_product;
+            } else if (branch == "branchA") {
+                return "Total Sales Per Customer Type for Branch A " +  line_string + " for " + key_product;
+            }  else if (branch == "branchB") {
+                return "Total Sales Per Customer Type for Branch B" + line_string + " for " + key_product;
+            }  else if (branch == "branchC") {
+                return "Total Sales Per Customer Type for Branch C" + line_string + " for " + key_product;
+            } else {
+                return "none"
+            }
+        } )
+    
+    var myorder = ["Normal", "Member"]
+    final_out = final_out.sort((x, y) => myorder.indexOf(x.key) - myorder.indexOf(y.key));
+    console.log(final_out)
+    
+    //"Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"
+    var x = d3.scaleBand().domain(["Normal", "Member"]).range([0, 475]).padding(0.8);
+    xa = d3.axisBottom(d3.scaleBand().domain(["Normal", "Member"]).range([0, 475]));
+    ya = d3.axisLeft(d3.scaleLinear().domain([0, 5000]).range([375,0]));
+    mysvg.append("g").attr("transform", "translate(0, 375)").call(xa)
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(315)")
+        .style("text-anchor", "end");
+    mysvg.append("g").call(ya);
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", 290)
+        .attr("y", 450)
+        .text("Customer Type");
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", -100)
+        .attr("y", -70)
+        .attr("dy", ".02em")
+        .attr("transform", "rotate(-90)")
+        .text("Total Sales in Dollars");
+
+    var y = d3.scaleLinear().domain([0, 5000]).range([375, 0]);
+    var points = mysvg.append("g").selectAll(".bar").data(final_out).enter()
+                    .append('rect')
+                    .attr('x',function(d, i){return i * 475 / 2 + 75})
+                    .attr('y', function(d) {return y(d.value)})
+                    .attr('width',x.bandwidth() + 50)
+                    .attr('height',function(d,i){return 375 - y(d.value) })
+                    .style('fill',function(d){
+                        if (key_product == "Sports and travel") {
+                            return "#E8DE03";
+                        }
+                        if (key_product == "Home and lifestyle") {
+                            return "#33CA3E";
+                        }
+                        if (key_product == "Fashion accessories") {
+                            return "#F98B00";
+                        }
+                        if (key_product == "Electronic accessories") {
+                            return "#AA64FF";
+                        }
+                        if (key_product== "Food and beverages") {
+                            return "#D90000";
+                        }
+                        if (key_product == "Health and beauty") {
+                            return "#00BAF6";
+                        }
+                        return "black"
+                    });
+
+    mysvg.append("g").selectAll(".bar").data(final_out).enter().append("text")
+        .text(function(d){return d.value.toFixed(2);})
+        .attr('x',function(d, i){return i * 475 / 2 + 120})
+        .attr('y', function(d) {return y(d.value) - 3})
+        .attr("font-size" , "14px")
+        .style('fill',function(d){return "black"})
+        .attr("text-anchor", "middle");
+
+}
+
+async function init() {
+    dropdown.property("value", "branchAll");
+    createFirstChart();
+
+}
+
+
+
+</script>
+</body>
+</html>
