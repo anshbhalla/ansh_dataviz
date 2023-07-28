@@ -2,13 +2,15 @@
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <style> circle {fill: "blue"; stroke: "black";} </style>
 <body onload='init()'>
-<br><br><br><br>
-    <select id = "branch_type" text-align: center>
+    <center><h1 text-align:center>Supermarket Sales Overview</h1></center>
+    <center><h4>Select Supermarket Branch:   <select id = "branch_type" text-align: center>
         <option value="branchAll">All Branches</option>
         <option value="branchA">Branch A</option>
         <option value="branchB">Branch B</option>
         <option value="branchC">Branch C</option>
-    </select>
+    </select></h4>
+</center>
+    
 
 <!-- <svg width=300 height=300 >
 </svg> -->
@@ -26,11 +28,13 @@ async function createFirstChart(drop_val) {
 
     // console.log(JSON.stringify(data["val"], null, 4))
 
-    console.log(branch)
+    console.log(tdata)
 
 
     var mydict = {}
     Object.keys(tdata).forEach(function(key){
+        // console.log("here", tdata[key])
+
         if (branch == "branchAll") {
             var floor_time = parseFloat(tdata[key]["Time"])
             if (mydict.hasOwnProperty(floor_time)){
@@ -120,9 +124,9 @@ async function createFirstChart(drop_val) {
     
     var mysvg = d3.select("body")
                 .append("svg")
-                .attr("width", 1500).attr("height", 700)
+                .attr("width", 1400).attr("height", 600)
                 .append("g")
-                .attr("transform", "translate(500, 100)")
+                .attr("transform", "translate(470, 100)")
                 .attr("id", "firstChart");
     mysvg.append("text")
         .attr("x", 270)
@@ -142,6 +146,8 @@ async function createFirstChart(drop_val) {
                 return "none"
             }
         } )
+
+    
             
 
     // console.log(final_out)
@@ -161,6 +167,7 @@ async function createFirstChart(drop_val) {
         .attr("text-anchor", "end")
         .attr("x", 310)
         .attr("y", 420)
+        .style("font-size", "20px")
         .text("Hours of Store");
 
     mysvg.append("text")
@@ -169,6 +176,7 @@ async function createFirstChart(drop_val) {
         .attr("y", -70)
         .attr("dy", ".02em")
         .attr("transform", "rotate(-90)")
+        .style("font-size", "20px")
         .text("Total Sales in Dollars");
 
     
@@ -180,13 +188,40 @@ async function createFirstChart(drop_val) {
       .attr("d", d3.line().x(function(d) { return x(d.key) - 20}).y(function(d) { return y(d.value) }))
 
 
+    // var points = mysvg.append("g").selectAll("dot").data(final_out).enter()
+    //             .append("circle")
+    //             .attr("cx", function (d){return x(d.key) - 20;})
+    //             .attr("cy", function(d){return y(d.value); })
+    //             .attr("r", 5)
+    //             .style("fill", "blue").on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createSecondChart(d, d.key, branch) });
+
     var points = mysvg.append("g").selectAll("dot").data(final_out).enter()
                 .append("circle")
                 .attr("cx", function (d){return x(d.key) - 20;})
                 .attr("cy", function(d){return y(d.value); })
                 .attr("r", 5)
-                .style("fill", "blue").on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createSecondChart(d, d.key, branch) }) ;
-                // .style("fill", "blue").on("click", function (d) { console.log(d.key) }) ;
+                .style("fill", "blue")
+                .on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createSecondChart(d, d.key, branch) });
+
+    var resetButton = mysvg.append("g").selectAll(".bar").data(final_out).enter()
+                    .append('rect')
+                    .attr('x',function(d, i){return 140})
+                    .attr('y', function(d) {return -100})
+                    .attr('width',function(d) {return 375 - 160})
+                    .attr('height',function(d,i){return 30 })
+                    .style('fill', "pink")
+                    .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
+
+    mysvg.append("g").selectAll(".bar").data(final_out).enter().append("text")
+        .text(function(d){return "Click Here to Reset Visualization"})
+        .attr('x',function(d, i){return 248})
+        .attr('y', function(d) {return -80})
+        .attr("font-size" , "15px")
+        .style('fill',function(d){return "black"})
+        .attr("text-anchor", "middle")
+        .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
+
+
     // var x = d3.scaleLog().base(10).domain(domain).range([ 0, width ]);
     
 
@@ -351,9 +386,9 @@ async function createSecondChart(tdata, key_hour, branch){
 
 
     var mysvg = d3.select("svg")
-                    .attr("width", 1000).attr("height", 700)
+                    .attr("width", 1300).attr("height", 600)
                     .append("g")
-                    .attr("transform", "translate(400, 100)")
+                    .attr("transform", "translate(470, 100)")
                     .attr("id", "secondChart");
 
     
@@ -418,7 +453,8 @@ async function createSecondChart(tdata, key_hour, branch){
     mysvg.append("text")
         .attr("text-anchor", "end")
         .attr("x", 290)
-        .attr("y", 475)
+        .attr("y", 480)
+        .style("font-size", "20px")
         .text("Product Line Type");
 
     mysvg.append("text")
@@ -427,6 +463,7 @@ async function createSecondChart(tdata, key_hour, branch){
         .attr("y", -70)
         .attr("dy", ".02em")
         .attr("transform", "rotate(-90)")
+        .style("font-size", "20px")
         .text("Total Sales in Dollars");
 
     var y = d3.scaleLinear().domain([0, 9000]).range([375, 0]);
@@ -470,7 +507,7 @@ async function createSecondChart(tdata, key_hour, branch){
             return d.value.toFixed(2);})
         .attr('x',function(d, i){return i * 475 / 6 + 40})
         .attr('y', function(d) {return y(d.value) - 3})
-        .attr("font-size" , "12px")
+        .attr("font-size" , "13px")
         .style('fill',function(d){
             console.log("in function", max_key, d.key)
             if (d.key == max_key) {
@@ -481,6 +518,24 @@ async function createSecondChart(tdata, key_hour, branch){
             }
             return "black"})
         .attr("text-anchor", "middle");
+
+    var resetButton = mysvg.append("g").selectAll(".bar").data(final_out).enter()
+                    .append('rect')
+                    .attr('x',function(d, i){return 140})
+                    .attr('y', function(d) {return -100})
+                    .attr('width',function(d) {return 375 - 160})
+                    .attr('height',function(d,i){return 30 })
+                    .style('fill', "pink")
+                    .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
+
+    mysvg.append("g").selectAll(".bar").data(final_out).enter().append("text")
+        .text(function(d){return "Click Here to Reset Visualization"})
+        .attr('x',function(d, i){return 248})
+        .attr('y', function(d) {return -80})
+        .attr("font-size" , "15px")
+        .style('fill',function(d){return "black"})
+        .attr("text-anchor", "middle")
+        .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
 
     
 
@@ -598,9 +653,9 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         line_string = String(parseInt(key_hour) - 12) + "PM"
     }
     var mysvg = d3.select("svg")
-                    .attr("width", 1500).attr("height", 700)
+                    .attr("width", 1500).attr("height", 600)
                     .append("g")
-                    .attr("transform", "translate(400, 100)")
+                    .attr("transform", "translate(470, 100)")
                     .attr("id", "secondChart");
 
                     mysvg.append("text")
@@ -640,6 +695,7 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         .attr("text-anchor", "end")
         .attr("x", 290)
         .attr("y", 450)
+        .style("font-size", "20px")
         .text("Customer Type");
 
     mysvg.append("text")
@@ -648,6 +704,7 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         .attr("y", -70)
         .attr("dy", ".02em")
         .attr("transform", "rotate(-90)")
+        .style("font-size", "20px")
         .text("Total Sales in Dollars");
 
     var y = d3.scaleLinear().domain([0, 5000]).range([375, 0]);
@@ -686,6 +743,25 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         .attr("font-size" , "14px")
         .style('fill',function(d){return "black"})
         .attr("text-anchor", "middle");
+
+
+    var resetButton = mysvg.append("g").selectAll(".bar").data(final_out).enter()
+                    .append('rect')
+                    .attr('x',function(d, i){return 140})
+                    .attr('y', function(d) {return -100})
+                    .attr('width',function(d) {return 375 - 160})
+                    .attr('height',function(d,i){return 30 })
+                    .style('fill', "pink")
+                    .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
+
+    mysvg.append("g").selectAll(".bar").data(final_out).enter().append("text")
+        .text(function(d){return "Click Here to Reset Visualization"})
+        .attr('x',function(d, i){return 248})
+        .attr('y', function(d) {return -80})
+        .attr("font-size" , "15px")
+        .style('fill',function(d){return "black"})
+        .attr("text-anchor", "middle")
+        .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
 
 }
 
