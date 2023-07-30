@@ -12,8 +12,7 @@
 </center>
     
 
-<!-- <svg width=300 height=300 >
-</svg> -->
+
 <script>
 
 const dropdown = d3.select("#branch_type");
@@ -28,7 +27,7 @@ async function createFirstChart(drop_val) {
 
     // console.log(JSON.stringify(data["val"], null, 4))
 
-    console.log(tdata)
+    // console.log(tdata)
 
 
     var mydict = {}
@@ -71,8 +70,7 @@ async function createFirstChart(drop_val) {
             }
         }
 
-        // mydict[floor_time] = mydict[floor_time] + 1
-        // console.log(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
+        //nsole.log(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
     });
 
     for (var key in mydict){
@@ -80,7 +78,7 @@ async function createFirstChart(drop_val) {
             continue;
         }
         var value = mydict[key]
-        console.log(key, value)
+        // console.log(key, value)
     }
 
     var outdata = []
@@ -157,11 +155,18 @@ async function createFirstChart(drop_val) {
     var x = d3.scaleLinear().domain([9, 20]).range([0, 475]);
     
 
-    // xa = d3.axisBottom(d3.scaleLinear().domain([9, 20]).range([0, 475])).tickValues(xLabels);
     xa = d3.axisBottom(d3.scaleBand().domain(xLabels).range([0, 475]));
     ya = d3.axisLeft(d3.scaleLinear().domain([0, 45000]).range([375,0]));
     mysvg.append("g").attr("transform", "translate(0, 375)").call(xa);
     mysvg.append("g").call(ya);
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", 450)
+        .attr("y", 460)
+        .style("font-size", "16px")
+        .text("Click on any Scatter Plot Point to drill down into that Hour!")
+        .attr("fill", "blue");;
 
     mysvg.append("text")
         .attr("text-anchor", "end")
@@ -175,7 +180,7 @@ async function createFirstChart(drop_val) {
         .attr("x", -100)
         .attr("y", -70)
         .attr("dy", ".02em")
-        .attr("transform", "rotate(-90)")
+        .attr("transform", "rotate(270)")
         .style("font-size", "20px")
         .text("Total Sales in Dollars");
 
@@ -188,20 +193,13 @@ async function createFirstChart(drop_val) {
       .attr("d", d3.line().x(function(d) { return x(d.key) - 20}).y(function(d) { return y(d.value) }))
 
 
-    // var points = mysvg.append("g").selectAll("dot").data(final_out).enter()
-    //             .append("circle")
-    //             .attr("cx", function (d){return x(d.key) - 20;})
-    //             .attr("cy", function(d){return y(d.value); })
-    //             .attr("r", 5)
-    //             .style("fill", "blue").on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createSecondChart(d, d.key, branch) });
-
     var points = mysvg.append("g").selectAll("dot").data(final_out).enter()
                 .append("circle")
                 .attr("cx", function (d){return x(d.key) - 20;})
                 .attr("cy", function(d){return y(d.value); })
                 .attr("r", 5)
                 .style("fill", "blue")
-                .on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createSecondChart(d, d.key, branch) });
+                .on("click", function (d) { d3.selectAll("svg > *").remove();createSecondChart(d, d.key, branch) });
 
     var resetButton = mysvg.append("g").selectAll(".bar").data(final_out).enter()
                     .append('rect')
@@ -222,8 +220,7 @@ async function createFirstChart(drop_val) {
         .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
 
 
-    // var x = d3.scaleLog().base(10).domain(domain).range([ 0, width ]);
-    
+
 
     // console.log("my max_key", max_key)
     // console.log(min_key)
@@ -286,7 +283,7 @@ async function createSecondChart(tdata, key_hour, branch){
     d3.selectAll('#firstChart').remove();
     var tdata = await d3.csv("https://anshbhalla.github.io/testData/supermarket_sales%20-%20Sheet1.csv")
 
-    // console.log(tdata_2)
+
     
 
     var mydict = {}
@@ -347,8 +344,7 @@ async function createSecondChart(tdata, key_hour, branch){
             }
         }
 
-        // mydict[floor_time] = mydict[floor_time] + 1
-        // console.log(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
+      //g(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
     });
 
 
@@ -372,7 +368,7 @@ async function createSecondChart(tdata, key_hour, branch){
 
 
     final_out = []
-    console.log("here")
+    // console.log("here")
     max_key = ""
     max_val = 0
     min_key = ""
@@ -381,12 +377,12 @@ async function createSecondChart(tdata, key_hour, branch){
 
         final_out.push({"key": outdata[i]["key"], "value": outdata[i]["value"]})
 
-        console.log("yup", outdata[i]["key"], outdata[i]["value"])
+        // console.log("yup", outdata[i]["key"], outdata[i]["value"])
     }
 
 
     var mysvg = d3.select("svg")
-                    .attr("width", 1300).attr("height", 600)
+                    .attr("width", 1300).attr("height", 650)
                     .append("g")
                     .attr("transform", "translate(470, 100)")
                     .attr("id", "secondChart");
@@ -408,15 +404,15 @@ async function createSecondChart(tdata, key_hour, branch){
         .style("font-size", "28px")
         .text(function(d) {
             if (branch == "branchAll") {
-                return "Total Sales Per Product Line at for All Branches at " + line_string;
+                return "Total Sales Per Product Line for All Branches at " + line_string;
             } else if (branch == "branchA") {
-                return "Total Sales Per Product Line at for Branch A at " + line_string;
+                return "Total Sales Per Product Line for Branch A at " + line_string;
             }  else if (branch == "branchB") {
-                return "Total Sales Per Product Line at for Branch A at " + line_string;
+                return "Total Sales Per Product Line for Branch B at " + line_string;
             }  else if (branch == "branchC") {
-                return "Total Sales Per Product Line at for Branch A at " + line_string;
+                return "Total Sales Per Product Line for Branch C at " + line_string;
             } else {
-                return "none"
+                return "no branch problem"
             }
         } )
 
@@ -426,7 +422,7 @@ async function createSecondChart(tdata, key_hour, branch){
     final_out = final_out.sort((x, y) => myorder.indexOf(x.key) - myorder.indexOf(y.key));
 
     for (let i = 0; i < final_out.length; i++) {
-        console.log("cur max", max_val, "cur min", min_val, "finalout", final_out[i]["value"], final_out[i]["key"])
+        // console.log("cur max", max_val, "cur min", min_val, "finalout", final_out[i]["value"], final_out[i]["key"])
         if (final_out[i]["value"] > max_val) {
             
             max_key = final_out[i]["key"]
@@ -437,18 +433,24 @@ async function createSecondChart(tdata, key_hour, branch){
         }
     }
 
-    console.log("here min", min_key)
+    // console.log("here min", min_key)
     
-    //"Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"
     var x = d3.scaleBand().domain(["Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"]).range([0, 475]);
     xa = d3.axisBottom(d3.scaleBand().domain(["Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"]).range([0, 475]));
     ya = d3.axisLeft(d3.scaleLinear().domain([0, 9000]).range([375,0]));
     mysvg.append("g").attr("transform", "translate(0, 375)").call(xa)
         .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(315)")
+        .attr("transform", "translate(-10,0) rotate(315)")
         .style("text-anchor", "end");
     mysvg.append("g").call(ya);
 
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", 400)
+        .attr("y", 510)
+        .style("font-size", "16px")
+        .text("Click on any Bar to drill down into that Product Line!")
+        .attr("fill", "blue");;
 
     mysvg.append("text")
         .attr("text-anchor", "end")
@@ -462,7 +464,7 @@ async function createSecondChart(tdata, key_hour, branch){
         .attr("x", -100)
         .attr("y", -70)
         .attr("dy", ".02em")
-        .attr("transform", "rotate(-90)")
+        .attr("transform", "rotate(270)")
         .style("font-size", "20px")
         .text("Total Sales in Dollars");
 
@@ -493,7 +495,7 @@ async function createSecondChart(tdata, key_hour, branch){
                             return "#00BAF6";
                         }
                         return "black"
-                    }).on("click", function (d) { console.log(d.key); d3.selectAll("svg > *").remove();createThirdChart(d, d.key, key_hour, branch) }) ;
+                    }).on("click", function (d) { d3.selectAll("svg > *").remove();createThirdChart(d, d.key, key_hour, branch) }) ;
 
 
     mysvg.append("g").selectAll(".bar").data(final_out).enter().append("text")
@@ -509,7 +511,7 @@ async function createSecondChart(tdata, key_hour, branch){
         .attr('y', function(d) {return y(d.value) - 3})
         .attr("font-size" , "13px")
         .style('fill',function(d){
-            console.log("in function", max_key, d.key)
+            // console.log("in function", max_key, d.key)
             if (d.key == max_key) {
                 return "green";
             }
@@ -542,11 +544,11 @@ async function createSecondChart(tdata, key_hour, branch){
 }
 
 async function createThirdChart(tdata, key_product, key_hour, branch){
-    console.log("in third chart")
+    // console.log("in third chart")
     d3.selectAll('#secondChart').remove();
     var tdata = await d3.csv("https://anshbhalla.github.io/testData/supermarket_sales%20-%20Sheet1.csv")
 
-    console.log(branch)
+    // console.log(branch)
 
     var mydict = {}
     Object.keys(tdata).forEach(function(key){
@@ -610,8 +612,7 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
             }
         }
 
-        // mydict[floor_time] = mydict[floor_time] + 1
-        // console.log(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
+        //g(key, tdata[key]["Time"], floor_time, parseFloat(tdata[key]["Total"]));
     });
 
 
@@ -620,7 +621,7 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
             continue;
         }
         var value = mydict[key]
-        // console.log(key, value)
+
     }
 
     var outdata = []
@@ -667,27 +668,26 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
             if (branch == "branchAll") {
                 return "Total Sales Per Customer Type for All Branches at " + line_string + " for " + key_product;
             } else if (branch == "branchA") {
-                return "Total Sales Per Customer Type for Branch A " +  line_string + " for " + key_product;
+                return "Total Sales Per Customer Type for Branch A at " +  line_string + " for " + key_product;
             }  else if (branch == "branchB") {
-                return "Total Sales Per Customer Type for Branch B" + line_string + " for " + key_product;
+                return "Total Sales Per Customer Type for Branch B at " + line_string + " for " + key_product;
             }  else if (branch == "branchC") {
-                return "Total Sales Per Customer Type for Branch C" + line_string + " for " + key_product;
+                return "Total Sales Per Customer Type for Branch C at " + line_string + " for " + key_product;
             } else {
-                return "none"
+                return "none - problem"
             }
         } )
     
     var myorder = ["Normal", "Member"]
     final_out = final_out.sort((x, y) => myorder.indexOf(x.key) - myorder.indexOf(y.key));
-    console.log(final_out)
+    // console.log(final_out)
     
-    //"Home and lifestyle", "Fashion accessories", "Sports and travel", "Electronic accessories", "Food and beverages", "Health and beauty"
     var x = d3.scaleBand().domain(["Normal", "Member"]).range([0, 475]).padding(0.8);
     xa = d3.axisBottom(d3.scaleBand().domain(["Normal", "Member"]).range([0, 475]));
     ya = d3.axisLeft(d3.scaleLinear().domain([0, 5000]).range([375,0]));
     mysvg.append("g").attr("transform", "translate(0, 375)").call(xa)
         .selectAll("text")
-        .attr("transform", "translate(-10,0)rotate(315)")
+        .attr("transform", "translate(-10,0) rotate(315)")
         .style("text-anchor", "end");
     mysvg.append("g").call(ya);
 
@@ -703,7 +703,7 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         .attr("x", -100)
         .attr("y", -70)
         .attr("dy", ".02em")
-        .attr("transform", "rotate(-90)")
+        .attr("transform", "rotate(270)")
         .style("font-size", "20px")
         .text("Total Sales in Dollars");
 
