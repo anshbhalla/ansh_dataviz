@@ -3,6 +3,7 @@
 <style> circle {fill: "blue"; stroke: "black";} </style>
 <body onload='init()'>
     <center><h1 text-align:center>Supermarket Sales Overview</h1></center>
+    <center><h4 >This visualization provides an in-depth overview about the sales of a supermarket. Throughout the scenes, we can analyze more details about the sales for each branch as well. Some of these further details include the sales per hour, product line, and customer type. We can answer questions like “What is our most popular hour across All Branches?”, “What is our least popular product line in Branch B?”, “Do Members or Normal customers prefer Electronic accessories in Branch A?”. Feel free to explore this drill-down visualization to gain a better understanding of the sales.</h4></center>
     <center><h4>Select Supermarket Branch:   <select id = "branch_type" text-align: center>
         <option value="branchAll">All Branches</option>
         <option value="branchA">Branch A</option>
@@ -11,6 +12,7 @@
     </select></h4>
 </center>
     
+
 
 
 <script>
@@ -167,6 +169,14 @@ async function createFirstChart(drop_val) {
         .style("font-size", "16px")
         .text("Click on any Scatter Plot Point to drill down into that Hour!")
         .attr("fill", "blue");;
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", 900)
+        .attr("y", 490)
+        .style("font-size", "16px")
+        .text("This scene displays the sales per hour of the chosen branch. The hours of the store are between 10AM and 9PM. Each hour on the x-axis represents an hour. For example, 1PM represents 1:00PM-2:00PM.")
+        .attr("fill", "teal");;
 
     mysvg.append("text")
         .attr("text-anchor", "end")
@@ -454,6 +464,14 @@ async function createSecondChart(tdata, key_hour, branch){
 
     mysvg.append("text")
         .attr("text-anchor", "end")
+        .attr("x", 700)
+        .attr("y", 538)
+        .style("font-size", "16px")
+        .text("This scene displays the sales per product line of the chosen branch (at the specified hour). There are a variety of product lines sold at the market.")
+        .attr("fill", "teal");;
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
         .attr("x", 290)
         .attr("y", 480)
         .style("font-size", "20px")
@@ -654,7 +672,7 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         line_string = String(parseInt(key_hour) - 12) + "PM"
     }
     var mysvg = d3.select("svg")
-                    .attr("width", 1500).attr("height", 600)
+                    .attr("width", 1500).attr("height", 650)
                     .append("g")
                     .attr("transform", "translate(470, 100)")
                     .attr("id", "secondChart");
@@ -690,6 +708,14 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         .attr("transform", "translate(-10,0) rotate(315)")
         .style("text-anchor", "end");
     mysvg.append("g").call(ya);
+
+    mysvg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", 700)
+        .attr("y", 475)
+        .style("font-size", "16px")
+        .text("This scene displays the sales per customer type (of the chosen branch at the specified hour). The customer types are either a Member or a Normal customer.")
+        .attr("fill", "teal");;
 
     mysvg.append("text")
         .attr("text-anchor", "end")
@@ -745,6 +771,7 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         .attr("text-anchor", "middle");
 
 
+
     var resetButton = mysvg.append("g").selectAll(".bar").data(final_out).enter()
                     .append('rect')
                     .attr('x',function(d, i){return 140})
@@ -762,6 +789,8 @@ async function createThirdChart(tdata, key_product, key_hour, branch){
         .style('fill',function(d){return "black"})
         .attr("text-anchor", "middle")
         .on("click", function (d) { d3.selectAll("svg > *").remove();createFirstChart()});
+
+
 
 }
 
